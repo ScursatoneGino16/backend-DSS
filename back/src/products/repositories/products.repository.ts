@@ -7,10 +7,16 @@ import {
 export const PRODUCTS_REPOSITORY = 'PRODUCTS_REPOSITORY';
 
 export interface ProductsRepository {
-  findAll(): Product[];
+  findAll(
+    name?: string, 
+    orderBy?: 'price' | 'name', 
+    order?: 'asc' | 'desc'
+  ): Product[];
+  
   findById(id: number): Product | undefined;
   create(input: CreateProductInput): Product;
   update(id: number, input: UpdateProductInput): Product | undefined;
   remove(id: number): Product | undefined;
+  updateStock(id: number, newStock: number): Product | undefined;
 }
 

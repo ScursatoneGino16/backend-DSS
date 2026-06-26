@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   CreateProductInput,
   Product,
@@ -16,8 +16,8 @@ export class ProductsService {
     private readonly productsRepository: ProductsRepository,
   ) {}
 
-  findAll(): Product[] {
-    return this.productsRepository.findAll();
+  findAll(name?: string, orderBy?: 'price' | 'name', order?: 'asc' | 'desc'): Product[] {
+    return this.productsRepository.findAll(name, orderBy, order);
   }
 
   findOne(id: number): Product {
@@ -40,6 +40,23 @@ export class ProductsService {
     const product = this.productsRepository.remove(id);
     if (!product) throw new NotFoundException('Product not found');
     return product;
+  }
+
+  updateStock(id: number, quantity: number): Product {
+    const product = this.productsRepository.findById(id);
+    if (!product) throw new NotFoundException('Product not found');
+    
+    if (quantity > product.stock) {
+      throw new BadRequestException('Stock insuficiente');
+    }
+
+    const updatedProduct = this.productsRepository.updateStock(id, product.stock - quantity);
+    
+    if (!updatedProduct) {
+      throw new NotFoundException('Product not found');
+    }
+
+    return updatedProduct;
   }
 }
 

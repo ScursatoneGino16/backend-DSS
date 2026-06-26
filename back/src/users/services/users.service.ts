@@ -1,4 +1,4 @@
-import { BadGatewayException, Inject, Injectable } from '@nestjs/common';
+import { BadGatewayException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ExternalUser } from '../user.types';
 import { USERS_GATEWAY, UsersGateway } from '../gateways/users.gateway';
 
@@ -16,5 +16,21 @@ export class UsersService {
       throw new BadGatewayException('Upstream users service failed');
     }
   }
-}
 
+  async findOne(id: number): Promise<ExternalUser> {
+    try {
+      const user = await this.usersGateway.fetchById(id);
+      
+      if (!user) {
+        throw new NotFoundException(`User with ID ${id} not found`);
+      }
+      
+      return user;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadGatewayException('Upstream users service failed');
+    }
+  }
+}
